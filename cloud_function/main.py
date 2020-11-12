@@ -21,6 +21,9 @@ def handler(request):
 
     result = query(q, dataset_id)
 
+    for item in result:
+        logging.info(item)
+
     publish(result, project_id, topic_id)
 
 
