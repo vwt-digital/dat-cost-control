@@ -2,6 +2,7 @@ import os
 import json
 import logging
 
+from gobits import Gobits
 from google.cloud import bigquery
 from google.cloud import pubsub_v1
 
@@ -24,7 +25,9 @@ def handler(request):
     for item in result:
         logging.info(item)
 
-    publish(result, project_id, topic_id)
+    metadata = Gobits.from_request(request=request)
+
+    publish(result, metadata, project_id, topic_id)
 
 
 def query(q: str, dataset_id: str):
@@ -41,7 +44,7 @@ def query(q: str, dataset_id: str):
     return [dict(row) for row in results]
 
 
-def publish(messages: list, project_id: str, topic_id: str):
+def publish(messages: list, metadata: dict, project_id: str, topic_id: str):
     """
     Publishes a json message to a Pub/Sub.
     """
@@ -50,12 +53,13 @@ def publish(messages: list, project_id: str, topic_id: str):
 
     topic_path = publisher.topic_path(project_id, topic_id)
 
-    for message in messages:
+    message = {
+        'gobits': [metadata],
+        'data': messages
+    }
 
-        data = json.dumps(message).encode('utf-8')
+    future = publisher.publish(
+        topic_path, json.dumps(message).encode('utf-8')
+    )
 
-        future = publisher.publish(
-            topic_path, data
-        )
-
-        logging.info(f"Published message with id {future.result()}")
+    logging.info(f"Published message with id {future.result()}")
