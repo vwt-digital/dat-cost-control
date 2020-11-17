@@ -25,7 +25,7 @@ def handler(request):
     for item in result:
         logging.info(item)
 
-    metadata = Gobits.from_request(request=request)
+    metadata = Gobits.from_request(request=request).to_json()
 
     publish(result, metadata, project_id, topic_id)
 
