@@ -51,7 +51,7 @@ def publish(messages: list, metadata: dict, project_id: str, topic_id: str):
 
     publisher = pubsub_v1.PublisherClient()
 
-    topic_path = publisher.topic_path(project_id, topic_id)
+    topic_path = publisher.topic_path(topic_id)
 
     message = {
         'gobits': [metadata],
