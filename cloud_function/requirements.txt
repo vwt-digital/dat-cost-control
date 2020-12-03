@@ -2,7 +2,7 @@ cachetools==4.1.1
 certifi==2020.11.8
 cffi==1.14.4
 chardet==3.0.4
-gobits==1.0.4
+gobits==1.0.5
 google-api-core==1.23.0
 google-auth==1.23.0
 google-cloud-bigquery==2.3.1
