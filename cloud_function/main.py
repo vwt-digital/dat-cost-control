@@ -51,7 +51,7 @@ def publish(messages: list, metadata: dict, project_id: str, topic_id: str):
 
     publisher = pubsub_v1.PublisherClient()
 
-    topic_path = publisher.topic_path(topic_id)
+    # topic_path = publisher.topic_path(topic_id)
 
     message = {
         'gobits': [metadata],
@@ -59,7 +59,7 @@ def publish(messages: list, metadata: dict, project_id: str, topic_id: str):
     }
 
     future = publisher.publish(
-        topic_path, json.dumps(message).encode('utf-8')
+        topic_id, json.dumps(message).encode('utf-8')
     )
 
     logging.info(f"Published message with id {future.result()}")
