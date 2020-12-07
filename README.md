@@ -14,8 +14,6 @@ gcloud functions deploy cost-monitoring-function \
   --region=europe-west1 \
   --memory=512MB \
   --timeout=120s \
-  --set-env-vars PROJECT_ID=${PROJECT_ID} \
-  --set-env-vars TOPIC_ID=${TOPIC_ID} \
   --set-env-vars DATASET_ID="project:dataset.gcp_billing_export_v1_XXXXXX_XXXXXX_XXXXXX"
 ```
 
