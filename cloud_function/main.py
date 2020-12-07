@@ -6,6 +6,8 @@ from gobits import Gobits
 from google.cloud import bigquery
 from google.cloud import pubsub_v1
 
+from config import TOPIC_NAME
+
 
 def handler(request):
     """
@@ -13,8 +15,6 @@ def handler(request):
     Results from this query are published on Pub/Sub topic.
     """
 
-    project_id = os.getenv("PROJECT_ID")
-    topic_id = os.getenv("TOPIC_ID")
     dataset_id = os.getenv("DATASET_ID")
 
     with open("query.sql") as f:
@@ -27,7 +27,7 @@ def handler(request):
 
     if result:
         metadata = Gobits.from_request(request=request).to_json()
-        publish(result, metadata, project_id, topic_id)
+        publish(result, metadata, TOPIC_NAME)
 
 
 def query(q: str, dataset_id: str):
@@ -44,14 +44,12 @@ def query(q: str, dataset_id: str):
     return [dict(row) for row in results]
 
 
-def publish(messages: list, metadata: dict, project_id: str, topic_id: str):
+def publish(messages: list, metadata: dict, topic_id: str):
     """
     Publishes a json message to a Pub/Sub.
     """
 
     publisher = pubsub_v1.PublisherClient()
-
-    # topic_path = publisher.topic_path(topic_id)
 
     message = {
         'gobits': [metadata],
