@@ -1,0 +1,5 @@
+{
+    "entry-point":"handler",
+    "memory": "256MB",
+    "runtime": "python38"
+}
