@@ -51,13 +51,15 @@ def publish(messages: list, metadata: dict, topic_id: str):
 
     publisher = pubsub_v1.PublisherClient()
 
-    message = {
-        'gobits': [metadata],
-        'data': messages
-    }
+    for message in messages:
 
-    future = publisher.publish(
-        topic_id, json.dumps(message).encode('utf-8')
-    )
+        prep_message = {
+            'gobits': [metadata],
+            'data': message
+        }
 
-    logging.info(f"Published message with id {future.result()}")
+        future = publisher.publish(
+            topic_id, json.dumps(prep_message).encode('utf-8')
+        )
+
+        logging.info(f"Published message with id {future.result()}")
