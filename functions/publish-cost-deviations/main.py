@@ -1,12 +1,10 @@
-import os
 import json
 import logging
-
-from gobits import Gobits
-from google.cloud import bigquery
-from google.cloud import pubsub_v1
+import os
 
 from config import TOPIC_NAME
+from gobits import Gobits
+from google.cloud import bigquery, pubsub_v1
 
 
 def handler(request):
@@ -53,13 +51,12 @@ def publish(messages: list, metadata: dict, topic_id: str):
 
     for message in messages:
 
-        prep_message = {
-            'gobits': [metadata],
-            'data': message
-        }
+        prep_message = {"gobits": [metadata], "data": message}
 
-        future = publisher.publish(
-            topic_id, json.dumps(prep_message).encode('utf-8')
-        )
+        logging.info(f"Message ready for publishing: {prep_message}")
 
-        logging.info(f"Published message with id {future.result()}")
+        if topic_id:
+            future = publisher.publish(
+                topic_id, json.dumps(prep_message).encode("utf-8")
+            )
+            logging.info(f"Published message with id {future.result()}")
