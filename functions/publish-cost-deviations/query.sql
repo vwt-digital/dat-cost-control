@@ -9,14 +9,14 @@ FROM (
   FROM (
     SELECT
       project.id AS project_id,
-      SUM(CASE WHEN DATE(usage_start_time) = current_date() - 1 THEN cost ELSE 0 END) AS cost_current,
-      SUM(CASE WHEN DATE(usage_start_time) = current_date() - 1 THEN c.amount ELSE 0 END) AS discount_current,
-      SUM(CASE WHEN DATE(usage_start_time) BETWEEN (current_date() - 8) AND (current_date() - 2) THEN cost ELSE 0 END) / 7 AS cost_lag,
-      SUM(CASE WHEN DATE(usage_start_time) BETWEEN (current_date() - 8) AND (current_date() - 2) THEN c.amount ELSE 0 END) / 7 AS discount_lag
+      SUM(CASE WHEN $CASE_ONE THEN cost ELSE 0 END) AS cost_current,
+      SUM(CASE WHEN $CASE_ONE THEN c.amount ELSE 0 END) AS discount_current,
+      SUM(CASE WHEN $CASE_TWO THEN cost ELSE 0 END) / 7 AS cost_lag,
+      SUM(CASE WHEN $CASE_TWO THEN c.amount ELSE 0 END) / 7 AS discount_lag
     FROM $DATASET
       LEFT JOIN UNNEST(credits) as c
     WHERE
-      DATE(usage_start_time) >= current_date() - 8
+      $WHERE_CONDITION
     GROUP BY
       project.id
     )

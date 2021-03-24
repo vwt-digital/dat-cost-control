@@ -18,7 +18,7 @@ def handler(request):
     with open("query.sql") as f:
         q = f.read()
 
-    result = query(q, dataset_id)
+    result = query(q, dataset_id, TOPIC_NAME)
 
     for item in result:
         logging.info(item)
@@ -28,12 +28,34 @@ def handler(request):
         publish(result, metadata, TOPIC_NAME)
 
 
-def query(q: str, dataset_id: str):
+def query(q: str, dataset_id: str, topic_id: str):
     """
     Runs a legacy SQL query in BigQuery.
     """
 
-    q = q.replace("$DATASET", dataset_id)
+    q = (
+        q.replace("$DATASET", dataset_id)
+        .replace(
+            "$WHERE_CONDITION",
+            ("DATE(usage_start_time) >= current_date() - 8" if topic_id else "TRUE"),
+        )
+        .replace(
+            "$CASE_ONE",
+            (
+                "DATE(usage_start_time) = current_date() - 1"
+                if topic_id
+                else "project.number = 549381727303"
+            ),
+        )
+        .replace(
+            "$CASE_TWO",
+            (
+                "DATE(usage_start_time) BETWEEN (current_date() - 8) AND (current_date() - 2)"
+                if topic_id
+                else "project.number != 549381727303"
+            ),
+        )
+    )
 
     client = bigquery.Client()
 
