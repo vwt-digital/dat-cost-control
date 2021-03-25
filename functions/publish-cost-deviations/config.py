@@ -1,1 +1,2 @@
-TOPIC_NAME = 'projects/XXXX/topics/YYYY'
+TOPIC_NAME = "projects/XXXX/topics/YYYY"
+EXTERNAL_PROJECT_ID = "00000000000"

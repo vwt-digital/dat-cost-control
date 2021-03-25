@@ -2,7 +2,7 @@ import json
 import logging
 import os
 
-from config import TOPIC_NAME
+from config import EXTERNAL_PROJECT_ID, TOPIC_NAME
 from gobits import Gobits
 from google.cloud import bigquery, pubsub_v1
 
@@ -44,7 +44,7 @@ def query(q: str, dataset_id: str, topic_id: str):
             (
                 "DATE(usage_start_time) = current_date() - 1"
                 if topic_id
-                else "project.number = 549381727303"
+                else f"project.number = {EXTERNAL_PROJECT_ID}"
             ),
         )
         .replace(
@@ -52,7 +52,7 @@ def query(q: str, dataset_id: str, topic_id: str):
             (
                 "DATE(usage_start_time) BETWEEN (current_date() - 8) AND (current_date() - 2)"
                 if topic_id
-                else "project.number != 549381727303"
+                else f"project.number != {EXTERNAL_PROJECT_ID}"
             ),
         )
     )
