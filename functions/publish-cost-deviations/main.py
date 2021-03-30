@@ -1,12 +1,10 @@
-import os
 import json
 import logging
+import os
 
+from config import EXTERNAL_PROJECT_ID, TOPIC_NAME
 from gobits import Gobits
-from google.cloud import bigquery
-from google.cloud import pubsub_v1
-
-from config import TOPIC_NAME
+from google.cloud import bigquery, pubsub_v1
 
 
 def handler(request):
@@ -20,7 +18,7 @@ def handler(request):
     with open("query.sql") as f:
         q = f.read()
 
-    result = query(q, dataset_id)
+    result = query(q, dataset_id, TOPIC_NAME)
 
     for item in result:
         logging.info(item)
@@ -30,12 +28,34 @@ def handler(request):
         publish(result, metadata, TOPIC_NAME)
 
 
-def query(q: str, dataset_id: str):
+def query(q: str, dataset_id: str, topic_id: str):
     """
     Runs a legacy SQL query in BigQuery.
     """
 
-    q = q.replace("$DATASET", dataset_id)
+    q = (
+        q.replace("$DATASET", dataset_id)
+        .replace(
+            "$WHERE_CONDITION",
+            ("DATE(usage_start_time) >= current_date() - 8" if topic_id else "TRUE"),
+        )
+        .replace(
+            "$CASE_ONE",
+            (
+                "DATE(usage_start_time) = current_date() - 1"
+                if topic_id
+                else f"project.number = {EXTERNAL_PROJECT_ID}"
+            ),
+        )
+        .replace(
+            "$CASE_TWO",
+            (
+                "DATE(usage_start_time) BETWEEN (current_date() - 8) AND (current_date() - 2)"
+                if topic_id
+                else f"project.number != {EXTERNAL_PROJECT_ID}"
+            ),
+        )
+    )
 
     client = bigquery.Client()
 
@@ -53,13 +73,12 @@ def publish(messages: list, metadata: dict, topic_id: str):
 
     for message in messages:
 
-        prep_message = {
-            'gobits': [metadata],
-            'data': message
-        }
+        prep_message = {"gobits": [metadata], "data": message}
 
-        future = publisher.publish(
-            topic_id, json.dumps(prep_message).encode('utf-8')
-        )
+        logging.info(f"Message ready for publishing: {prep_message}")
 
-        logging.info(f"Published message with id {future.result()}")
+        if topic_id:
+            future = publisher.publish(
+                topic_id, json.dumps(prep_message).encode("utf-8")
+            )
+            logging.info(f"Published message with id {future.result()}")
