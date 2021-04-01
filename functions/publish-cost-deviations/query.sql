@@ -23,4 +23,4 @@ FROM (
   )
 WHERE
   change >= 150
-  AND net_current_cost >= 0.10;
+  AND net_current_cost >= 0.50;
